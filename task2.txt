@@ -1,0 +1,87 @@
+USE OnlineBookstore;
+
+-- INSERT: Users
+INSERT INTO Users (name, email, password) VALUES 
+('Alice Johnson', 'alice@example.com', 'pass123'),
+('Bob Smith', 'bob@example.com', 'secret456'),
+('Charlie Rose', NULL, 'charliepass'), -- email is NULL to demonstrate missing value
+('Diana King', 'diana@example.com', NULL); -- password is NULL
+
+-- INSERT: Authors
+INSERT INTO Authors (name, bio) VALUES
+('George Orwell', 'Author of 1984 and Animal Farm'),
+('J.K. Rowling', 'Author of Harry Potter'),
+('Anonymous', NULL); -- bio is NULL
+
+-- INSERT: Categories
+INSERT INTO Categories (name) VALUES
+('Fiction'),
+('Thriller'),
+('Fantasy');
+
+-- INSERT: Books
+INSERT INTO Books (title, price, stock, author_id) VALUES
+('1984', 299.99, 10, 1),
+('Animal Farm', 199.50, 15, 1),
+('Harry Potter', 499.00, 8, 2),
+('Mystery Book', NULL, 5, 3); -- price is NULL
+
+-- INSERT: BookCategories
+INSERT INTO BookCategories (book_id, category_id) VALUES
+(1, 1),
+(1, 2),
+(2, 1),
+(3, 3),
+(4, 2);
+
+-- INSERT: Orders
+INSERT INTO Orders (user_id, order_date, status) VALUES
+(1, NOW(), 'Pending'),
+(2, NOW(), 'Shipped');
+
+-- INSERT: OrderItems
+INSERT INTO OrderItems (order_id, book_id, quantity, price) VALUES
+(1, 1, 1, 299.99),
+(1, 2, 1, 199.50),
+(2, 3, 2, 499.00);
+
+-- INSERT: Payments
+INSERT INTO Payments (order_id, amount, payment_date, method) VALUES
+(1, 499.49, NOW(), 'Credit Card'),
+(2, 998.00, NOW(), NULL); -- method is NULL
+
+-- UPDATE Example: Add missing email
+UPDATE Users
+SET email = 'charlie@example.com'
+WHERE name = 'Charlie Rose' AND email IS NULL;
+
+-- UPDATE multiple rows: Set all NULL prices to a default
+UPDATE Books
+SET price = 150.00
+WHERE price IS NULL;
+
+-- DELETE Example: Remove orders with no payment
+DELETE FROM Orders
+WHERE order_id NOT IN (SELECT order_id FROM Payments);
+
+-- DELETE Example with rollback logic (simulate using transaction):
+START TRANSACTION;
+
+DELETE FROM Users
+WHERE name = 'Diana King';
+
+-- ROLLBACK; -- Uncomment to test rollback behavior
+-- COMMIT; -- Uncomment if confirmed
+
+-- INSERT partial values (only name)
+INSERT INTO Categories (name) VALUES ('Biography');
+
+-- INSERT using SELECT
+INSERT INTO Books (title, price, stock, author_id)
+SELECT 'Copy of 1984', price, stock, author_id
+FROM Books
+WHERE title = '1984';
+
+-- ON DELETE CASCADE Example
+-- (You must have ON DELETE CASCADE set in FK for this to work)
+-- DELETE FROM Authors WHERE author_id = 1; -- will also delete books by that author if FK was defined with CASCADE
